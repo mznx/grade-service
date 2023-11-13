@@ -1,0 +1,19 @@
+services:
+
+  mariadb:
+    build: ./etc/volumes/mariadb
+    restart: always
+    environment:
+      MARIADB_ROOT_PASSWORD: $MARIADB_ROOT_PASSWORD
+      MARIADB_USER: $MARIADB_USER
+      MARIADB_PASSWORD: $MARIADB_PASSWORD
+      MARIADB_DATABASE: $MARIADB_DATABASE
+    ports:
+      - $MARIADB_PORT:3306
+      # - 127.0.0.1:$MARIADB_PORT:3306
+
+  grade-service:
+    build: ./grade-service
+    command: sh -c 'npm ci && npm run watch'
+    volumes:
+      - ./grade-service:/home/node/app
