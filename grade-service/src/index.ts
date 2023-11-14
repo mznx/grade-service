@@ -1,39 +1,38 @@
 import Fastify from 'fastify';
-import { connect, StringCodec, Subscription } from 'nats';
+import PluginLoader from './plugin';
+import RouteLoader from './route';
+import studentGrade from './db/model/studentGrade.model';
+import { StudentGrade } from './interface/nats.interface';
 
 const fastify = Fastify({
     logger: true,
 });
 
-const sc = StringCodec();
+const subscribeOnGrade = () => {
+    const studentGrade1 = studentGrade(fastify.db.sequelize);
 
-async function listenNats(sub: Subscription) {
-    return Promise.resolve((async () => {
-        const subj = sub.getSubject();
-        console.log(`listening for ${subj}`);
-        for await (const m of sub) {
-            console.log('m', sc.decode(m.data));
-        }
-    })());
-}
+    // Подписка
+    fastify.nats.subscribe('students.v1.graded', async (message: string) => {
+
+        const data: StudentGrade = JSON.parse(message).data;
+        console.log('msg:', data);
+
+        await studentGrade1.create({
+            personalCode: data.personalCode,
+            grade: data.grade,
+            subject: data.subject,
+        });
+    });
+};
 
 (async () => {
     try {
-        const nc = await connect({ servers: '192.162.246.63:4222' });
-        console.log(`connected to ${nc.getServer()}`);
+        await fastify.register(PluginLoader);
+        RouteLoader(fastify);
 
-        // Подписка
-        const s1 = nc.subscribe('students.v1.graded');
-        listenNats(s1);
+        subscribeOnGrade();
 
-        // Получение информации
-        const req = await nc.request('students.v1.get', sc.encode(JSON.stringify({ personalCode: '1383DB747648' })));
-        console.log('req', sc.decode(req.data));
-
-        await fastify.listen({
-            host: '0.0.0.0',
-            port: 3001,
-        });
+        await fastify.listen(fastify.conf.server);
     } catch (error) {
         console.error(error);
         process.exit(1);

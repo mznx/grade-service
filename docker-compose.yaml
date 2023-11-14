@@ -14,6 +14,9 @@ services:
 
   grade-service:
     build: ./grade-service
+    restart: always
     command: sh -c 'npm ci && npm run watch'
     volumes:
       - ./grade-service:/home/node/app
+    ports:
+      - 8080:8080

@@ -4,7 +4,8 @@
   "scripts": {
     "build": "tsc",
     "watch": "tsc-watch --onSuccess \"npm run start\"",
-    "start": "node ./build/index.js"
+    "start": "node ./build/index.js",
+    "migration:up": "npx sequelize-cli db:migrate --options-path ./build/db/options.js"
   },
   "author": "",
   "license": "ISC",
@@ -13,12 +14,14 @@
     "@typescript-eslint/eslint-plugin": "^6.10.0",
     "@typescript-eslint/parser": "^6.10.0",
     "eslint": "^8.53.0",
+    "sequelize-cli": "^6.6.2",
     "tsc-watch": "^6.0.4",
     "typescript": "^5.2.2"
   },
   "dependencies": {
     "fastify": "^4.24.3",
     "fastify-plugin": "^4.5.1",
+    "mysql2": "^3.6.3",
     "nats": "^2.18.0",
     "sequelize": "^6.35.0"
   }
