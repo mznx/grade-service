@@ -1,7 +1,6 @@
 import Fastify from 'fastify';
 import PluginLoader from './plugin';
 import RouteLoader from './route';
-import studentGrade from './db/model/studentGrade.model';
 import { StudentGrade } from './interface/nats.interface';
 
 const fastify = Fastify({
@@ -9,15 +8,13 @@ const fastify = Fastify({
 });
 
 const subscribeOnGrade = () => {
-    const studentGrade1 = studentGrade(fastify.db.sequelize);
-
     // Подписка
     fastify.nats.subscribe('students.v1.graded', async (message: string) => {
 
         const data: StudentGrade = JSON.parse(message).data;
         console.log('msg:', data);
 
-        await studentGrade1.create({
+        await fastify.db.models.studentGrade.create({
             personalCode: data.personalCode,
             grade: data.grade,
             subject: data.subject,

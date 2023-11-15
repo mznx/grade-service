@@ -1,6 +1,7 @@
 import { FastifyInstance } from 'fastify';
 import fastifyPlugin from 'fastify-plugin';
 import { Options, Sequelize } from 'sequelize';
+import ModelsLoader from '../../db/models';
 
 const init = async (config: Options) => {
     const sequelize = new Sequelize(config);
@@ -9,6 +10,7 @@ const init = async (config: Options) => {
 
     return {
         sequelize: sequelize,
+        models: ModelsLoader(sequelize),
     };
 };
 
