@@ -12,7 +12,7 @@ export default (sequelize: Sequelize) => {
             type: DataTypes.STRING,
         },
 
-        firstName: {
+        name: {
             type: DataTypes.STRING,
         },
 

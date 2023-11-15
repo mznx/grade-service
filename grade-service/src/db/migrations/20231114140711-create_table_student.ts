@@ -15,7 +15,7 @@ module.exports = <Migration>{
                 type: Sequelize.STRING,
             },
 
-            firstName: {
+            name: {
                 type: Sequelize.STRING,
             },
 

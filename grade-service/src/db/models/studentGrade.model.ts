@@ -23,5 +23,10 @@ export default (sequelize: Sequelize) => {
         freezeTableName: true,
     });
 
+    StudentGrade.hasOne(sequelize.models['student'], {
+        foreignKey: 'personalCode',
+        sourceKey: 'personalCode',
+    });
+
     return StudentGrade;
 };
