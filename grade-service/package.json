@@ -4,7 +4,7 @@
   "scripts": {
     "build": "tsc",
     "watch": "tsc-watch --onSuccess \"npm run start\"",
-    "start": "node ./build/index.js",
+    "start": "npm run migration:up && node ./build/index.js",
     "migration:up": "npx sequelize-cli db:migrate --options-path ./build/db/options.js"
   },
   "author": "",
