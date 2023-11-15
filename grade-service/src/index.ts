@@ -13,6 +13,15 @@ const subscribeOnGrade = () => {
 
         const data: StudentGrade = JSON.parse(message).data;
         await fastify.db.models.studentGrade.create({ ...data });
+
+        const personalCode = data.personalCode;
+        const studentData = await fastify.db.models.student.findOne({ where: { personalCode }});
+
+        if (!studentData) {
+            const studentJSON = await fastify.nats.request('students.v1.get', { personalCode });
+            const student = JSON.parse(studentJSON).data;
+            await fastify.db.models.student.create(student);
+        }
     });
 };
 

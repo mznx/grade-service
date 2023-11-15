@@ -3,19 +3,26 @@ import { FastifyInstance } from 'fastify';
 export default (fastify: FastifyInstance) => {
     fastify.get('/log', async (request) => {
         const queryParam = { page: 0, limit: 10 };
+
         if (request.query) {
-            const query = request.query as { page?: number; limit: number };
-            queryParam.page = query.page ?? queryParam.page;
-            queryParam.limit = query.limit ?? queryParam.limit;
+            const query = request.query as { page?: string; limit?: string };
+            queryParam.page = Number(query.page) ?? queryParam.page;
+            queryParam.limit = Number(query.limit) ?? queryParam.limit;
         }
 
-        console.log('param', queryParam);
-
-        const res = await fastify.db.models.studentGrade.findAndCountAll({
+        const data = await fastify.db.models.studentGrade.findAll({
+            attributes: [ [ 'createdAt', 'date' ], 'subject', 'grade' ],
+            include: [
+                {
+                    model: fastify.db.models.student,
+                    attributes: [ 'personalCode', 'name', 'lastName' ],
+                    required: false,
+                },
+            ],
             limit: queryParam.limit,
             offset: queryParam.page * queryParam.limit,
         });
 
-        return res;
+        return data;
     });
 };

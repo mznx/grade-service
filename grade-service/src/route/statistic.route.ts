@@ -1,32 +1,39 @@
 import { FastifyInstance } from 'fastify';
 
 export default (fastify: FastifyInstance) => {
+    fastify.get('/statistic/:personalCode', async (request, response) => {
+        const params = request.params as { personalCode?: string };
 
-    fastify.get('/statistic/:personalCode', async (request) => {
-        const params: any = request.params;
+        if (!params.personalCode) {
+            response.statusCode = 400;
+            throw new Error('personalCode param is required');
+        }
+
         const personalCode = params.personalCode;
-        console.log('personalCode', personalCode);
 
         const seq = fastify.db.sequelize;
 
-        const studentJSON = await fastify.nats.request('students.v1.get', { personalCode });
-        const student = JSON.parse(studentJSON).data;
+        const [ student, statistic ] = await Promise.all([
 
-        const statistic = await fastify.db.models.studentGrade.findAll({
-            attributes: [
-                'subject',
-                [ seq.fn('max', seq.col('grade')), 'maxGrade' ],
-                [ seq.fn('min', seq.col('grade')), 'minGrade' ],
-                [ seq.fn('avg', seq.col('grade')), 'avgGrade' ],
-                [ seq.fn('count', seq.col('grade')), 'totalGrades' ],
-            ],
-            group: 'subject',
-            where: { personalCode },
-        });
+            fastify.db.models.student.findOne({
+                attributes: [ 'personalCode', 'name', 'lastName' ],
+                where: { personalCode },
+            }),
 
-        return {
-            student,
-            statistic,
-        };
+            fastify.db.models.studentGrade.findAll({
+                attributes: [
+                    'subject',
+                    [ seq.fn('max', seq.col('grade')), 'maxGrade' ],
+                    [ seq.fn('min', seq.col('grade')), 'minGrade' ],
+                    [ seq.fn('avg', seq.col('grade')), 'avgGrade' ],
+                    [ seq.fn('count', seq.col('grade')), 'totalGrades' ],
+                ],
+                group: 'subject',
+                where: { personalCode },
+            }),
+
+        ]);
+
+        return { student, statistic };
     });
 };
