@@ -1,4 +1,3 @@
-import EventEmitter from 'node:events';
 import { FastifyInstance } from 'fastify';
 import fastifyPlugin from 'fastify-plugin';
 import { StringCodec, connect } from 'nats';
@@ -11,8 +10,6 @@ interface NatsConfig {
 const sc = StringCodec();
 
 const init = async (config: NatsConfig) => {
-    const emitter = new EventEmitter();
-
     const nc = await connect({ servers: `${config.host}:${config.port}` });
     console.log(`NATS Plugin: Connected to ${nc.getServer()}`);
 
@@ -21,14 +18,15 @@ const init = async (config: NatsConfig) => {
 
         /** Подписаться на тему */
         subscribe: (subject: string, callback: (message: string) => void) => {
-            const sub = nc.subscribe(subject);
-            emitter.on(subject, callback);
-
-            (async () => {
-                for await (const msg of sub) {
-                    emitter.emit(subject, sc.decode(msg.data));
-                }
-            })();
+            nc.subscribe(subject, {
+                callback: (err, msg) => {
+                    if (err) {
+                        console.log(`NATS ${subject} subscribe error:`, err);
+                        return;
+                    }
+                    callback(sc.decode(msg.data));
+                },
+            });
         },
 
         /** Запрос данных из темы */

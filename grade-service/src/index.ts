@@ -7,18 +7,12 @@ const fastify = Fastify({
     logger: true,
 });
 
+/** Подписка на очередь */
 const subscribeOnGrade = () => {
-    // Подписка
-    fastify.nats.subscribe('students.v1.graded', async (message: string) => {
+    fastify.nats.subscribe('students.v1.graded', async (message) => {
 
         const data: StudentGrade = JSON.parse(message).data;
-        console.log('msg:', data);
-
-        await fastify.db.models.studentGrade.create({
-            personalCode: data.personalCode,
-            grade: data.grade,
-            subject: data.subject,
-        });
+        await fastify.db.models.studentGrade.create({ ...data });
     });
 };
 
@@ -27,9 +21,9 @@ const subscribeOnGrade = () => {
         await fastify.register(PluginLoader);
         RouteLoader(fastify);
 
+        await fastify.listen(fastify.conf.server);
         subscribeOnGrade();
 
-        await fastify.listen(fastify.conf.server);
     } catch (error) {
         console.error(error);
         process.exit(1);

@@ -9,7 +9,7 @@ export default (fastify: FastifyInstance) => {
 
         const seq = fastify.db.sequelize;
 
-        const studentJSON = await fastify.nats.request('students.v1.get', { personalCode: personalCode });
+        const studentJSON = await fastify.nats.request('students.v1.get', { personalCode });
         const student = JSON.parse(studentJSON).data;
 
         const statistic = await fastify.db.models.studentGrade.findAll({
