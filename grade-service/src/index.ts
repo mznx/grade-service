@@ -11,9 +11,11 @@ const fastify = Fastify({
 const subscribeOnGrade = () => {
     fastify.nats.subscribe('students.v1.graded', async (message) => {
 
+        // Сохраняем очередную оценку
         const data: StudentGrade = JSON.parse(message).data;
         await fastify.db.models.studentGrade.create({ ...data });
 
+        // Сохраняем данные студента
         const personalCode = data.personalCode;
         const studentData = await fastify.db.models.student.findOne({ where: { personalCode }});
 

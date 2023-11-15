@@ -14,7 +14,6 @@ export default (fastify: FastifyInstance) => {
         const seq = fastify.db.sequelize;
 
         const [ student, statistic ] = await Promise.all([
-
             fastify.db.models.student.findOne({
                 attributes: [ 'personalCode', 'name', 'lastName' ],
                 where: { personalCode },
@@ -31,7 +30,6 @@ export default (fastify: FastifyInstance) => {
                 group: 'subject',
                 where: { personalCode },
             }),
-
         ]);
 
         return { student, statistic };

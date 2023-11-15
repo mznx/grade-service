@@ -16,7 +16,7 @@ const init = async (config: NatsConfig) => {
     return {
         connection: nc,
 
-        /** Подписаться на тему */
+        /** Подписаться на топик */
         subscribe: (subject: string, callback: (message: string) => void) => {
             nc.subscribe(subject, {
                 callback: (err, msg) => {
@@ -29,7 +29,7 @@ const init = async (config: NatsConfig) => {
             });
         },
 
-        /** Запрос данных из темы */
+        /** Запрос данных из топика */
         request: async (subject: string, data: Record<string, string | number>) => {
             const req = await nc.request(subject, sc.encode(JSON.stringify(data)));
             return sc.decode(req.data);
